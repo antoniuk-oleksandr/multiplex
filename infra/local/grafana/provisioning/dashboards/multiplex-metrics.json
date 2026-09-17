@@ -1,0 +1,244 @@
+{
+  "id": null,
+  "uid": "multiplex-metrics",
+  "title": "Multiplex Metrics",
+  "schemaVersion": 39,
+  "version": 5,
+  "refresh": "15s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "API metrics available",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "up{job=\"multiplex-api\",instance=\"api:8000\"}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU usage",
+      "gridPos": {
+        "h": 8,
+        "w": 9,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        }
+      },
+      "targets": [
+        {
+          "expr": "100 * rate(multiplex_process_cpu_seconds_total{job=\"multiplex-api\",instance=\"api:8000\"}[5m])",
+          "legendFormat": "NestJS app",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory usage",
+      "gridPos": {
+        "h": 8,
+        "w": 9,
+        "x": 15,
+        "y": 0
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        }
+      },
+      "targets": [
+        {
+          "expr": "multiplex_process_resident_memory_bytes{job=\"multiplex-api\",instance=\"api:8000\"}",
+          "legendFormat": "RSS",
+          "refId": "A"
+        },
+        {
+          "expr": "multiplex_nodejs_heap_size_used_bytes{job=\"multiplex-api\",instance=\"api:8000\"}",
+          "legendFormat": "heap used",
+          "refId": "B"
+        },
+        {
+          "expr": "multiplex_nodejs_heap_size_total_bytes{job=\"multiplex-api\",instance=\"api:8000\"}",
+          "legendFormat": "heap total",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP request rate",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(multiplex_http_requests_total{job=\"multiplex-api\"}[5m]))",
+          "legendFormat": "requests/sec",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP request latency",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      },
+      "targets": [
+        {
+          "expr": "1000 * histogram_quantile(0.50, sum by (le) (rate(multiplex_http_request_duration_seconds_bucket{job=\"multiplex-api\"}[5m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "1000 * histogram_quantile(0.95, sum by (le) (rate(multiplex_http_request_duration_seconds_bucket{job=\"multiplex-api\"}[5m])))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "expr": "1000 * histogram_quantile(0.99, sum by (le) (rate(multiplex_http_request_duration_seconds_bucket{job=\"multiplex-api\"}[5m])))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Event-loop lag",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      },
+      "targets": [
+        {
+          "expr": "1000 * multiplex_nodejs_eventloop_lag_p99_seconds{job=\"multiplex-api\",instance=\"api:8000\"}",
+          "legendFormat": "p99",
+          "refId": "A"
+        },
+        {
+          "expr": "1000 * multiplex_nodejs_eventloop_lag_mean_seconds{job=\"multiplex-api\",instance=\"api:8000\"}",
+          "legendFormat": "mean",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Garbage collection (% runtime)",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        }
+      },
+      "targets": [
+        {
+          "expr": "100 * rate(multiplex_nodejs_gc_duration_seconds_sum{job=\"multiplex-api\",instance=\"api:8000\"}[5m])",
+          "legendFormat": "GC time/sec",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Active Node.js resources",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "multiplex_nodejs_active_resources_total{job=\"multiplex-api\",instance=\"api:8000\"}",
+          "legendFormat": "total active resources",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Event-loop utilization",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        }
+      },
+      "targets": [
+        {
+          "expr": "100 * multiplex_nodejs_eventloop_utilization_ratio{job=\"multiplex-api\",instance=\"api:8000\"}",
+          "legendFormat": "start time",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
